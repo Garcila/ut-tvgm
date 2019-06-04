@@ -4,6 +4,7 @@
   import EndScreen from "./EndScreen.svelte";
   import StartScreen from "./StartScreen.svelte";
   import Playing from "./Playing.svelte";
+  import Footer from "./Footer.svelte";
 
   let time = 30;
   let questions = [];
@@ -15,18 +16,20 @@
   let end = false;
   let good = 0;
   let bad = 0;
+  let category = 10;
 
+  let visibleAnswer = false;
   let visible = true;
 
   $: askQuestion = questions[count];
   $: time;
 
-  onMount(() => {
-    getQuestions();
-  });
+  // onMount(() => {
+  //   getQuestions();
+  // });
 
-  async function getQuestions() {
-    const URL = `https://opentdb.com/api.php?amount=2&category=10&type=multiple`;
+  async function getQuestions(category) {
+    const URL = `https://opentdb.com/api.php?amount=2&category=${category}&type=multiple`;
     const res = await fetch(URL);
     const data = await res.json();
     questions = data.results;
@@ -37,7 +40,8 @@
     });
   }
 
-  function startPlaying() {
+  function startPlaying(category) {
+    getQuestions(category);
     playing = true;
     const interval = setInterval(() => {
       if (time > 0 && !end) {
@@ -59,13 +63,14 @@
 
   function checkAnswer(e) {
     if (firstChoice) {
-      // e.target.classList.add("active");
       const answered = e.target.attributes.q.value;
       if (answered === askQuestion.correct_answer) {
         isAnswerCorrect = "yes";
+        visibleAnswer = true;
         good++;
       } else {
         isAnswerCorrect = "no";
+        visibleAnswer = true;
         bad++;
       }
       // Decrease available time to 3 seconds once the question has been answered
@@ -86,21 +91,28 @@
     firstChoice = true;
     playing = true;
     end = false;
-    good = 0;
-    bad = 0;
+    // good = 0;
+    // bad = 0;
     getQuestions();
   }
 </script>
 
 <style>
- 
+
 </style>
 
 <Header />
 {#if !playing && !end}
-  <StartScreen {startPlaying} />
+  <StartScreen {startPlaying} {category} />
 {:else if playing && !end}
-  <Playing {time} {askQuestion} {checkAnswer} {isAnswerCorrect} {visible} />
+  <Playing
+    {time}
+    {askQuestion}
+    {checkAnswer}
+    {isAnswerCorrect}
+    {visible}
+    {visibleAnswer} />
 {:else}
   <EndScreen {good} {bad} {restart} />
 {/if}
+<Footer />
