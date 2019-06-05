@@ -17,6 +17,7 @@
   let good = 0;
   let bad = 0;
   let category = 10;
+  let interval = 0;
 
   let visibleAnswer = false;
   let visible = true;
@@ -24,12 +25,8 @@
   $: askQuestion = questions[count];
   $: time;
 
-  // onMount(() => {
-  //   getQuestions();
-  // });
-
   async function getQuestions(category) {
-    const URL = `https://opentdb.com/api.php?amount=2&category=${category}&type=multiple`;
+    const URL = `https://opentdb.com/api.php?amount=10&category=${category}&type=multiple`;
     const res = await fetch(URL);
     const data = await res.json();
     questions = data.results;
@@ -43,9 +40,10 @@
   function startPlaying(category) {
     getQuestions(category);
     playing = true;
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
       if (time > 0 && !end) {
-        time -= 1;
+        time = time - 1;
+        console.log(time);
       } else {
         time = 30;
         visible = true;
@@ -82,17 +80,13 @@
   }
 
   function restart() {
-    end = false;
-    time = 30;
     count = 0;
     questions = [];
-    askQuestion;
     isAnswerCorrect = "";
     firstChoice = true;
-    playing = true;
+    playing = false;
     end = false;
-    // good = 0;
-    // bad = 0;
+    clearInterval(interval);
     getQuestions();
   }
 </script>
